@@ -17,7 +17,6 @@ AWS_IOT_ENDPOINT = "al9jms4pkzeur-ats.iot.us-east-1.amazonaws.com"
 AWS_CERT_FILENAME = "/home/stephen/thing_local_tester/822ccf140cdb4b6387ecf961c6db738928fcc10103f230a6fcaeea5e0e431103-certificate.pem.crt"
 AWS_PRI_KEY_FILENAME = "/home/stephen/thing_local_tester/822ccf140cdb4b6387ecf961c6db738928fcc10103f230a6fcaeea5e0e431103-private.pem.key"
 AWS_CLIENT_ID = "thing_local_tester"
-AWS_MESSAGE_TOPIC = "dt/bt_scan_log_v1/user1/home1/scanner1/localname1"
 SHADOW_PROPERTY = "scan_period_s"
 SHADOW_VALUE_DEFAULT = "yo donkey"
 SHADOW_THING_NAME = "local_tester"
@@ -98,16 +97,15 @@ class aws_pipe():
             except queue.Empty:
                 break
         print(f"\r\nParsing {len(evt_list)} events\r\n")
-        for complete_local_name in evt_list:
-            if complete_local_name == b'Fi-FC32H000325':
-                topic = f"dt/bt_scan_log_v1/user1/home1/scanner1/{complete_local_name}"
-                message_json = json.dumps({"timestamp":time.time()})
-                print("Publish...")
-                self.mqtt_connection.publish(
-                    topic=AWS_MESSAGE_TOPIC,
-                    payload=message_json,
-                    qos=mqtt.QoS.AT_LEAST_ONCE)
-                break
+        for adv_data in evt_list:
+            topic = f"dt/bt_scan_log_v1/scanner1"
+            message_json = json.dumps(adv_data)
+            print(message_json)
+            print("Publish...")
+            self.mqtt_connection.publish(
+                topic=topic,
+                payload=message_json,
+                qos=mqtt.QoS.AT_LEAST_ONCE)
 
     def start_pipe(self):
         self.t = PeriodicTimer(10.0, self.on_timer_expire, [self.bt_to_aws_queue])
