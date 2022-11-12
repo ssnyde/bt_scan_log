@@ -109,7 +109,7 @@ class aws_pipe():
                 qos=mqtt.QoS.AT_LEAST_ONCE)
 
     def start_pipe(self):
-        self.t = PeriodicTimer(10.0, self.on_timer_expire, [self.bt_to_aws_queue])
+        self.t = PeriodicTimer(1, self.on_timer_expire, [self.bt_to_aws_queue])
         self.t.start()
 
     def disconnect(self):
