@@ -1,0 +1,4 @@
+awscrt==0.14.6
+awsiotsdk==1.11.8
+pybgapi==1.2.0
+pyserial==3.5
