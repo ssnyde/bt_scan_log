@@ -13,9 +13,8 @@ import traceback
 from uuid import uuid4
 
 # AWS Values
+from aws_cert_path import AWS_CERT_FILENAME, AWS_PRI_KEY_FILENAME
 AWS_IOT_ENDPOINT = "al9jms4pkzeur-ats.iot.us-east-1.amazonaws.com"
-AWS_CERT_FILENAME = "/home/stephen/thing_local_tester/822ccf140cdb4b6387ecf961c6db738928fcc10103f230a6fcaeea5e0e431103-certificate.pem.crt"
-AWS_PRI_KEY_FILENAME = "/home/stephen/thing_local_tester/822ccf140cdb4b6387ecf961c6db738928fcc10103f230a6fcaeea5e0e431103-private.pem.key"
 AWS_CLIENT_ID = "thing_local_tester"
 TOPIC_PREFIX = "dt/bt_scan_log_v1/"
 SHADOW_PROPERTY = "scan_period_s"
