@@ -13,13 +13,11 @@ import traceback
 from uuid import uuid4
 
 # AWS Values
-from aws_cert_path import AWS_CERT_FILENAME, AWS_PRI_KEY_FILENAME
+from aws_cert_path import *
 AWS_IOT_ENDPOINT = "al9jms4pkzeur-ats.iot.us-east-1.amazonaws.com"
-AWS_CLIENT_ID = "thing_local_tester"
 TOPIC_PREFIX = "dt/bt_scan_log_v1/"
 SHADOW_PROPERTY = "scan_period_s"
 SHADOW_VALUE_DEFAULT = "yo donkey"
-SHADOW_THING_NAME = "local_tester"
 
 class LockedData:
     def __init__(self):
@@ -42,51 +40,51 @@ class aws_pipe():
             keep_alive_secs=30)
         connect_future = self.mqtt_connection.connect()
         connect_future.result()
-        self.shadow_client = iotshadow.IotShadowClient(self.mqtt_connection)
+        #self.shadow_client = iotshadow.IotShadowClient(self.mqtt_connection)
         print("Connected!")
         self.locked_data = LockedData()
 
         # Subscribe to necessary topics.
         # Note that is **is** important to wait for "accepted/rejected" subscriptions
         # to succeed before publishing the corresponding "request".
-        print("Subscribing to Update responses...")
-        update_accepted_subscribed_future, _ = self.shadow_client.subscribe_to_update_shadow_accepted(
-            request=iotshadow.UpdateShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self.on_update_shadow_accepted)
+        #print("Subscribing to Update responses...")
+        #update_accepted_subscribed_future, _ = self.shadow_client.subscribe_to_update_shadow_accepted(
+        #    request=iotshadow.UpdateShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
+        #    qos=mqtt.QoS.AT_LEAST_ONCE,
+        #    callback=self.on_update_shadow_accepted)
 
-        update_rejected_subscribed_future, _ = self.shadow_client.subscribe_to_update_shadow_rejected(
-            request=iotshadow.UpdateShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self.on_update_shadow_rejected)
-
-        # Wait for subscriptions to succeed
-        update_accepted_subscribed_future.result()
-        update_rejected_subscribed_future.result()
-
-        print("Subscribing to Get responses...")
-        get_accepted_subscribed_future, _ = self.shadow_client.subscribe_to_get_shadow_accepted(
-            request=iotshadow.GetShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self.on_get_shadow_accepted)
-
-        get_rejected_subscribed_future, _ = self.shadow_client.subscribe_to_get_shadow_rejected(
-            request=iotshadow.GetShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self.on_get_shadow_rejected)
+        #update_rejected_subscribed_future, _ = self.shadow_client.subscribe_to_update_shadow_rejected(
+        #    request=iotshadow.UpdateShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
+        #    qos=mqtt.QoS.AT_LEAST_ONCE,
+        #    callback=self.on_update_shadow_rejected)
 
         # Wait for subscriptions to succeed
-        get_accepted_subscribed_future.result()
-        get_rejected_subscribed_future.result()
+        #update_accepted_subscribed_future.result()
+        #update_rejected_subscribed_future.result()
 
-        print("Subscribing to Delta events...")
-        delta_subscribed_future, _ = self.shadow_client.subscribe_to_shadow_delta_updated_events(
-            request=iotshadow.ShadowDeltaUpdatedSubscriptionRequest(thing_name=SHADOW_THING_NAME),
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self.on_shadow_delta_updated)
+        #print("Subscribing to Get responses...")
+        #get_accepted_subscribed_future, _ = self.shadow_client.subscribe_to_get_shadow_accepted(
+        #    request=iotshadow.GetShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
+        #    qos=mqtt.QoS.AT_LEAST_ONCE,
+        #    callback=self.on_get_shadow_accepted)
+
+        #get_rejected_subscribed_future, _ = self.shadow_client.subscribe_to_get_shadow_rejected(
+        #    request=iotshadow.GetShadowSubscriptionRequest(thing_name=SHADOW_THING_NAME),
+        #    qos=mqtt.QoS.AT_LEAST_ONCE,
+        #    callback=self.on_get_shadow_rejected)
+
+        # Wait for subscriptions to succeed
+        #get_accepted_subscribed_future.result()
+        #get_rejected_subscribed_future.result()
+
+        #print("Subscribing to Delta events...")
+        #delta_subscribed_future, _ = self.shadow_client.subscribe_to_shadow_delta_updated_events(
+        #    request=iotshadow.ShadowDeltaUpdatedSubscriptionRequest(thing_name=SHADOW_THING_NAME),
+        #    qos=mqtt.QoS.AT_LEAST_ONCE,
+        #    callback=self.on_shadow_delta_updated)
 
         # Wait for subscription to succeed
-        delta_subscribed_future.result()
+        #delta_subscribed_future.result()
 
 
     def on_timer_expire(self, evt_queue):
@@ -98,7 +96,7 @@ class aws_pipe():
                 break
         print(f"\r\nParsing {len(evt_list)} events\r\n")
         for adv_data in evt_list:
-            topic = f"{TOPIC_PREFIX}{adv_data['scanner_thing_name']}"
+            topic = f"{TOPIC_PREFIX}{AWS_CLIENT_ID}"
             message_json = json.dumps(adv_data)
             print(message_json)
             print("Publish...")
