@@ -33,6 +33,7 @@ class aws_pipe():
             endpoint=AWS_IOT_ENDPOINT,
             cert_filepath=AWS_CERT_FILENAME,
             pri_key_filepath=AWS_PRI_KEY_FILENAME,
+            ca_filepath=AWS_CA_FILENAME,
             on_connection_interrupted=self.on_connection_interrupted,
             on_connection_resumed=self.on_connection_resumed,
             client_id=AWS_CLIENT_ID,
