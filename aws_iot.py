@@ -4,7 +4,7 @@ import time
 
 from awscrt import mqtt
 from awsiot import mqtt_connection_builder, iotshadow
-from util import PeriodicTimer
+from periodic_timer import PeriodicTimer
 
 from concurrent.futures import Future
 import sys
