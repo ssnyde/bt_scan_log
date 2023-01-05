@@ -103,48 +103,32 @@ class App(BluetoothApp):
             print("Connection closed")
             self.adv_start()
 
-        elif evt == "bt_evt_scanner_scan_report":
+        elif evt == "bt_evt_scanner_legacy_advertisement_report" or evt == "bt_evt_scanner_extended_advertisement_report":
             adv_data = parse_adv_data(evt.data)
             adv_data['scanner_thing_name'] = 'scanner1'
             adv_data['timestamp'] = time.time()
             adv_data['DATETIME'] = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(adv_data['timestamp']))
-            if evt.packet_type & 7 == 0:
-                adv_data['PACKET_TYPE'] = 'CONNECTABLE_SCANNABLE_UNDIRECTED'
-            elif evt.packet_type & 7 == 1:
-                adv_data['PACKET_TYPE'] = 'CONNECTABLE_UNDIRECTED'
-            elif evt.packet_type & 7 == 2:
-                adv_data['PACKET_TYPE'] = 'SCANNABLE_UNDIRECTED'
-            elif evt.packet_type & 7 == 3:
-                adv_data['PACKET_TYPE'] = 'NON-CONNECTABLE_NON-SCANNABLE_UNDIRECTED'
-            elif evt.packet_type & 7 == 4:
-                adv_data['PACKET_TYPE'] = 'SCAN_RESPONSE'
-            else:
-                adv_data['PACKET_TYPE'] = 'DECODE_ERROR'
-            if evt.packet_type & 0x60 == 0:
-                adv_data['DATA_COMPLETENESS'] = 'COMPLETE'
-            elif evt.packet_type & 0x60 == 0x20:
-                adv_data['DATA_COMPLETENESS'] = 'INCOMPLETE_MORE'
-            elif evt.packet_type & 0x60 == 0x40:
-                adv_data['DATA_COMPLETENESS'] = 'INCOMPLETE_TRUNCATED'
-            else:
-                adv_data['DATA_COMPLETENESS'] = 'DECODE_ERROR'
+            adv_data['PDU'] = 'LEGACY' if evt == "bt_evt_scanner_legacy_advertisement_report" else 'EXTENDED'
+            adv_data['CONNECTABLE'] = True if evt.event_flags & 1 else False
+            adv_data['SCANNABLE'] = True if evt.event_flags & 2 else False
+            adv_data['DIRECTED'] = True if evt.event_flags & 4 else False
+            adv_data['SCAN_RESPONSE'] = True if evt.event_flags & 8 else False
             adv_data['ADDRESS'] = evt.address
             if evt.address_type == 0:
                 adv_data['ADDRESS_TYPE'] = 'PUBLIC'
             elif evt.address_type == 1:
                 adv_data['ADDRESS_TYPE'] = 'RANDOM'
-            elif evt.address_type == 255:
-                adv_data['ADDRESS_TYPE'] = 'ANNONYMOUS'
             else:
                 adv_data['ADDRESS_TYPE'] = 'DECODE_ERROR'
-            adv_data['ADV_SID'] = evt.adv_sid
-            if evt.tx_power == 127:
-                adv_data['TX_POWER'] = 'INFORMATION_UNAVAILABLE'
-            else:
-                adv_data['TX_POWER'] = evt.tx_power
-            adv_data['RSSI'] = evt.rssi
-            adv_data['CHANNEL'] = evt.channel
-            adv_data['PERIODIC_INTERVAL'] = evt.periodic_interval * 1.25 #units of ms
+            if evt == "bt_evt_scanner_extended_advertisement_report":
+                adv_data['ADV_SID'] = evt.adv_sid
+                if evt.tx_power == 127:
+                    adv_data['TX_POWER'] = 'INFORMATION_UNAVAILABLE'
+                else:
+                    adv_data['TX_POWER'] = evt.tx_power
+                adv_data['RSSI'] = evt.rssi
+                adv_data['CHANNEL'] = evt.channel
+                adv_data['PERIODIC_INTERVAL'] = evt.periodic_interval * 1.25 #units of ms
             bt_to_aws_queue.put(adv_data)
             #print(evt)
             #print(adv_data)
@@ -157,10 +141,11 @@ class App(BluetoothApp):
     def scan_start(self):
         """ Start scanning. """
         """ 1M PHY, 10ms scan interval, 10ms scan window, time in units of 0.625ms """
-        self.lib.bt.scanner.set_timing(1, 16000, 1600)
+        #self.lib.bt.scanner.set_timing(1, 16000, 1600)
         #self.lib.bt.scanner.set_timing(1, 16, 16)
         """ 1M PHY, active scanning, which will ask make scan request """
-        self.lib.bt.scanner.set_mode(1,1)
+        #self.lib.bt.scanner.set_mode(1,1)
+        self.lib.bt.scanner.set_parameters(1, 16000, 1600)
         """ Scan on 1M PHY, both limited and general discoverable """
         self.lib.bt.scanner.start(1,1)
         
