@@ -2,7 +2,7 @@ import argparse
 import queue
 import time
 
-from util import BluetoothApp
+from util import BluetoothApp, ArgumentParser, get_connector
 from aws_iot import aws_pipe
 
 #Reference Bluetooth Specification Assigned Numbers Doc, Common Data Types Section
@@ -170,9 +170,11 @@ class App(BluetoothApp):
 if __name__ =="__main__":
     ap = aws_pipe(bt_to_aws_queue)
     ap.start_pipe()
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = ArgumentParser(description=__doc__)
+    args = parser.parse_args()
+    connector = get_connector(args)
     # Instantiate the application.
-    app = App(parser=parser)
+    app = App(connector)
     # Running the application blocks execution until it terminates.
     app.run()
     ap.disconnect()
