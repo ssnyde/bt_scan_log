@@ -83,6 +83,9 @@ bt_to_aws_queue = queue.Queue()
 
 class App(BluetoothApp):
     """ Application derived from generic BluetoothApp. """
+    def __init__(self, connector, thing_name):
+        self.thing_name = thing_name
+        super().__init__(connector=connector)
     def event_handler(self, evt):
         """ Override default event handler of the parent class. """
         # This event indicates the device has started and the radio is ready.
@@ -105,7 +108,9 @@ class App(BluetoothApp):
 
         elif evt == "bt_evt_scanner_legacy_advertisement_report" or evt == "bt_evt_scanner_extended_advertisement_report":
             adv_data = parse_adv_data(evt.data)
-            adv_data['scanner_thing_name'] = 'scanner1'
+            # scanner_thing_name is fixed based on MQTT CLIENT_ID which must be the same as the Thing name
+            # found in aws_cert_path.py and imported by aws_iot.py
+            adv_data['scanner_thing_name'] = self.thing_name
             adv_data['timestamp'] = time.time()
             adv_data['DATETIME'] = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(adv_data['timestamp']))
             adv_data['PDU'] = 'LEGACY' if evt == "bt_evt_scanner_legacy_advertisement_report" else 'EXTENDED'
@@ -174,7 +179,7 @@ if __name__ =="__main__":
     args = parser.parse_args()
     connector = get_connector(args)
     # Instantiate the application.
-    app = App(connector)
+    app = App(connector, ap.get_thing_name())
     # Running the application blocks execution until it terminates.
     app.run()
     ap.disconnect()

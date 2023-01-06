@@ -44,6 +44,10 @@ class aws_pipe():
         #self.shadow_client = iotshadow.IotShadowClient(self.mqtt_connection)
         print("Connected!")
         self.locked_data = LockedData()
+        self.thing_name = AWS_CLIENT_ID
+    
+    def get_thing_name(self):
+        return self.thing_name
 
         # Subscribe to necessary topics.
         # Note that is **is** important to wait for "accepted/rejected" subscriptions
